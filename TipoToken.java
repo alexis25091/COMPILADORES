@@ -12,7 +12,7 @@ public enum TipoToken {
     IZQ_LLAVE, DER_LLAVE,
 
     IDENTIFICADOR, NUMERO, CADENA,
-    PRINT, IF, WHILE, FOR, FUN, VAR, RETURN, ELSE, NULL, TRUE, FALSE,
+    Imprime, siEs, Mientras, Para, Funcion, Variable, Retorna, ENTONCES, Nulo, Falso, Verdadero,
 
     EOF
 }
