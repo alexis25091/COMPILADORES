@@ -35,14 +35,20 @@
             signosPuntuacion.put('}', TipoToken.DER_LLAVE);
 
             // Definir palabras reservadas
-            palabrasReservadas.put("if", TipoToken.IF);
-            palabrasReservadas.put("else", TipoToken.ELSE);
-            palabrasReservadas.put("while", TipoToken.WHILE);
-            palabrasReservadas.put("for", TipoToken.FOR);
-            palabrasReservadas.put("return", TipoToken.RETURN);
-            palabrasReservadas.put("true", TipoToken.TRUE);
-            palabrasReservadas.put("false", TipoToken.FALSE);
-        }
+            palabras_reservadas.put("else", TipoToken.ENTONCES);
+            palabras_reservadas.put("fun", TipoToken.Funcion);
+            palabras_reservadas.put("print", TipoToken.Imprime);
+            palabras_reservadas.put("var", TipoToken.Variable);
+            palabras_reservadas.put("if", TipoToken.siEs);
+            palabras_reservadas.put("return", TipoToken.Retorna);
+            palabras_reservadas.put("while", TipoToken.Mientras);
+            palabras_reservadas.put("for",TipoToken.Para);
+            palabras_reservadas.put("null",TipoToken.Nulo);
+
+            //Definicion de booleanos
+            booleanos.put("false", TipoToken.Falso);
+            booleanos.put("true", TipoToken.Verdadero);
+            }
 
         public Analizador(String fuente, int linea) {
             this.fuente = fuente;
