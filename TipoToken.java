@@ -9,10 +9,12 @@ public enum TipoToken {
 
     IZQ_PARENTESIS, DER_PARENTESIS,
     COMA, PUNTO_COMA,
-    IZQ_LLAVE, DER_LLAVE,
+    IZQ_LLAVE, DER_LLAVE, PUNTO,
 
     IDENTIFICADOR, NUMERO, CADENA,
-    Imprime, siEs, Mientras, Para, Funcion, Variable, Retorna, ENTONCES, Nulo, Falso, Verdadero,
+    PRINT, IF, WHILE, FOR, FUN, VAR, RETURN, ELSE, NULL, TRUE, FALSE,
 
-    EOF
+    EOF,
+
+    INT, FLOAT, DOUBLE,
 }
