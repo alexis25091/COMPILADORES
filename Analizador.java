@@ -29,7 +29,7 @@ public class Analizador {
         signosPuntuacion.put('*', TipoToken.PRODUCTO);
         signosPuntuacion.put(';', TipoToken.PUNTO_COMA);
         signosPuntuacion.put(',', TipoToken.COMA);
-        signosPuntuacion.put('.', TipoToken.PUNTO);
+
         signosPuntuacion.put('(', TipoToken.IZQ_PARENTESIS);
         signosPuntuacion.put(')', TipoToken.DER_PARENTESIS);
         signosPuntuacion.put('{', TipoToken.IZQ_LLAVE);
@@ -63,7 +63,7 @@ public class Analizador {
         int estado = 0;
         String lexema = "";
         char previous = ' ';
-        int Primerlinea = 0;
+       // int Primerlinea = 0;
         for (int i = 0; i < fuente.length(); i++) {
             char c = fuente.charAt(i);
 
@@ -96,6 +96,8 @@ public class Analizador {
                         lexema += c;
                     } else if (tokenSignoPuntuacion != null) {
                         generarTokenSimple(tokenSignoPuntuacion);
+                    } else if (c == '.') {
+                        System.out.println("Carácter no valido, " + "error en linea: " + linea);
                     }
                     break;
                 case 1:
@@ -260,7 +262,7 @@ public class Analizador {
                         estado = 28;
                     } else if (i == fuente.length() - 1) {
                         estado = 28;
-                        System.out.println("se supone aqui llegamos al borde");
+
                     }else {
                         estado = 27;
                     }
