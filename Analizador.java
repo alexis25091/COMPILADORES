@@ -285,6 +285,9 @@ public class Analizador {
             }
 
         }
+        if (previous != ';' && previous != '{' && previous != '}' && !fuente.trim().isEmpty()) {
+            System.out.println("Error en línea " + linea + ": se esperaba  ';' ");
+        }
     }
 
     private void generarTokenSimple(TipoToken tipo) {
