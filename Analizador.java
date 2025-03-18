@@ -5,12 +5,17 @@ import java.util.Scanner;
 
 public class Analizador {
 
+    // Mapa de operadores
     private static final Map<String, TipoToken> operadores = new HashMap<>();
+    // Mapa de signos de puntuación
     private static final Map<Character, TipoToken> signosPuntuacion = new HashMap<>();
+    // Mapa de palabras reservadas
     private static final Map<String, TipoToken> palabrasReservadas = new HashMap<>();
+
     private final String fuente;
     private int linea;
 
+    // Bloque estático para inicializar mapas
     static {
         operadores.put("/", TipoToken.ENTRE);
         operadores.put("<", TipoToken.MENORQUE);
@@ -29,7 +34,7 @@ public class Analizador {
         signosPuntuacion.put('*', TipoToken.PRODUCTO);
         signosPuntuacion.put(';', TipoToken.PUNTO_COMA);
         signosPuntuacion.put(',', TipoToken.COMA);
-
+        //signosPuntuacion.put('.', TipoToken.PUNTO);
         signosPuntuacion.put('(', TipoToken.IZQ_PARENTESIS);
         signosPuntuacion.put(')', TipoToken.DER_PARENTESIS);
         signosPuntuacion.put('{', TipoToken.IZQ_LLAVE);
@@ -56,161 +61,144 @@ public class Analizador {
 
     public Analizador(String fuente, int linea) {
         this.fuente = fuente;
-        this.linea = linea; // El contador de línea se pasa desde el main
+        this.linea = linea; // Valor inicial de la línea
     }
-
-    int cuentita = 0;
-    int cuentita2 = 0;
 
     public void escanear() {
         int estado = 0;
         String lexema = "";
-        char previous = ' ';
-        // int Primerlinea = 0;
-        boolean ultimoPuntoYComa = false;
+
         for (int i = 0; i < fuente.length(); i++) {
             char c = fuente.charAt(i);
 
+            // Contamos líneas para reportar correctamente
+            if (c == '\n') {
+                linea++;
+            }
+
             switch (estado) {
-
-                case 0: // Estado general de análisis
-                    // cuenta de ()
-                    if (c == '('){
-                        cuentita++;
-
-                    }else if (c == ')'){
-                        cuentita2++;
-
-                    }
-                    // inicio de analizador
-
+                case 0:
                     TipoToken tokenSignoPuntuacion = obtenerSignoPuntuacion(c);
+
                     if (c == '>') {
                         estado = 1;
-                        lexema += c;
+                        lexema = String.valueOf(c);
                     } else if (c == '<') {
                         estado = 4;
-                        lexema += c;
+                        lexema = String.valueOf(c);
                     } else if (c == '=') {
                         estado = 7;
-                        lexema += c;
+                        lexema = String.valueOf(c);
                     } else if (c == '!') {
                         estado = 10;
-                        lexema += c;
+                        lexema = String.valueOf(c);
                     } else if (Character.isLetter(c)) {
                         estado = 13;
-                        lexema += c;
+                        lexema = String.valueOf(c);
                     } else if (Character.isDigit(c)) {
                         estado = 15;
-                        lexema += c;
+                        lexema = String.valueOf(c);
                     } else if (c == '"') {
                         estado = 24;
-                        lexema += c;
+                        lexema = String.valueOf(c);
                     } else if (c == '/') {
-                        // Si encuentra '/', entra al estado de comentario
+                        // Podría ser división o inicio de comentario
                         estado = 26;
-                        lexema += c;
+                        lexema = ""; // Limpio para distinguir bien
                     } else if (tokenSignoPuntuacion != null) {
-                        if (c == ';') {
-                            if (ultimoPuntoYComa) {
-                                System.out.println("Error: punto y coma consecutivo en línea " + linea);
-                            } else {
-                                generarTokenSimple(tokenSignoPuntuacion);
-                                ultimoPuntoYComa = true;
-                            }
-                        } else {
-                            generarTokenSimple(tokenSignoPuntuacion);
-                            ultimoPuntoYComa = false;
-                        }
-                    } else if (c == '.') {
+                        generarToken(tokenSignoPuntuacion, String.valueOf(c));
+                    }else if (c == '.') {
                         System.out.println("Carácter no válido, error en línea: " + linea);
                     }
                     break;
 
+
                 case 1:
                     if (c == '=') {
                         lexema += c;
-                        generarTokenSimple(TipoToken.MAYORIGUAL);
+                        generarToken(TipoToken.MAYORIGUAL, lexema);
                         estado = 0;
                         lexema = "";
                     } else {
-                        generarTokenSimple(TipoToken.MAYORQUE);
+                        generarToken(TipoToken.MAYORQUE, lexema);
                         estado = 0;
                         lexema = "";
                         i--;
                     }
                     break;
+
                 case 4:
                     if (c == '=') {
                         lexema += c;
-                        generarTokenSimple(TipoToken.MENORIGUAL);
+                        generarToken(TipoToken.MENORIGUAL, lexema);
                         estado = 0;
                         lexema = "";
                     } else {
-                        generarTokenSimple(TipoToken.MENORQUE);
+                        generarToken(TipoToken.MENORQUE, lexema);
                         estado = 0;
                         lexema = "";
                         i--;
                     }
                     break;
+
                 case 7:
                     if (c == '=') {
                         lexema += c;
-                        generarTokenSimple(TipoToken.IGUALIGUAL);
+                        generarToken(TipoToken.IGUALIGUAL, lexema);
                         estado = 0;
                         lexema = "";
                     } else {
-                        generarTokenSimple(TipoToken.IGUAL);
+                        generarToken(TipoToken.IGUAL, lexema);
                         estado = 0;
                         lexema = "";
                         i--;
                     }
                     break;
+
                 case 10:
                     if (c == '=') {
                         lexema += c;
-                        generarTokenSimple(TipoToken.DISTINTO);
+                        generarToken(TipoToken.DISTINTO, lexema);
                         estado = 0;
                         lexema = "";
                     } else {
-                        generarTokenSimple(TipoToken.INVERSOR);
+                        generarToken(TipoToken.INVERSOR, lexema);
                         estado = 0;
                         lexema = "";
                         i--;
                     }
                     break;
+
                 case 13:
                     if (Character.isLetterOrDigit(c)) {
-                        estado = 13;
                         lexema += c;
                     } else {
-                        TipoToken tokenPalabraReservada = obtenerPalabraReservada(String.valueOf(lexema));
+                        // Verificamos si es palabra reservada
+                        TipoToken tokenPalabraReservada = obtenerPalabraReservada(lexema);
                         if (tokenPalabraReservada == null) {
-                            generarTokenMediano(TipoToken.IDENTIFICADOR, lexema);
-                            estado = 0;
-                            lexema = "";
+                            generarToken(TipoToken.IDENTIFICADOR, lexema);
                         } else {
-                            generarTokenSimple(tokenPalabraReservada);
+                            generarToken(tokenPalabraReservada, lexema);
                         }
                         estado = 0;
                         lexema = "";
-                        i--;  // Retrocede el índice para procesar el siguiente carácter
+                        i--;
                     }
                     break;
 
                 case 15:
                     if (Character.isDigit(c)) {
-                        estado = 15;
                         lexema += c;
                     } else if (c == '.') {
                         estado = 16;
                         lexema += c;
-                    } else if (c == 'E') {
+                    } else if (c == 'E' || c == 'e') {
                         estado = 17;
                         lexema += c;
                     } else {
-                        estado = 0;
+                        // Ya no es parte del número
                         generarToken(TipoToken.INT, lexema);
+                        estado = 0;
                         lexema = "";
                         i--;
                     }
@@ -218,165 +206,148 @@ public class Analizador {
 
                 case 16:
                     if (Character.isDigit(c)) {
-                        estado = 16;
                         lexema += c;
                     } else if (c == '.') {
-                        estado = 16;
-                        lexema += c;
-                    } else if (c == 'E') {
+                        lexema += c;  // casos de 12.34.?
+                    } else if (c == 'E' || c == 'e') {
                         estado = 17;
                         lexema += c;
                     } else {
-                        estado = 0;
                         generarToken(TipoToken.FLOAT, lexema);
+                        estado = 0;
                         lexema = "";
                         i--;
                     }
                     break;
 
                 case 17:
-                    if (Character.isDigit(c)) {
-                        estado = 17;
-                        lexema += c;
-                    } else if (c == '+') {
-                        estado = 17;
-                        lexema += c;
-                    } else if (c == '-') {
-                        estado = 17;
+                    if (Character.isDigit(c) || c == '+' || c == '-') {
                         lexema += c;
                     } else {
-                        estado = 0;
                         generarToken(TipoToken.DOUBLE, lexema);
+                        estado = 0;
                         lexema = "";
                         i--;
                     }
                     break;
 
                 case 24:
-
+                    // Leyendo una cadena
                     if (c == '"') {
-                        estado = 0;
                         lexema += c;
                         generarToken(TipoToken.CADENA, lexema);
+                        estado = 0;
                         lexema = "";
                     } else if (i == fuente.length() - 1) {
-                        System.out.println("Cadena sin cerrar en línea " + linea);
-                        lexema += "\n"; // agregar salto de linea para mantener la cadena
+                        // Llegamos al final sin cerrar comillas
+                        System.out.println("Cadena sin cerrar en línea: " + linea);
+                        lexema += "\n";
                     } else {
-                        lexema += c; // seguir acumulando caracteres
+                        lexema += c;
                     }
                     break;
 
-                case 26: // comentario de línea
-                    if (c == '\n') {
-                        estado = 0; // fin del comentario de línea volver al estado inicial
-
-                    }
-                    break;
-
-                case 27: // comentario de bloque
-                    if (c == '*') {
-                        estado = 28; // potencial fin de comentario
-                    }
-                    break;
-
-                case 28: // verificar si es fin de comentario de bloque
+                case 26:
+                    // Acabamos de leer '/'
                     if (c == '/') {
-                        estado = 0; // Fin del comentario de bloque volver al estado inicial
-                    } else if (c != '*') {
-                        estado = 27; // continuar leyendo el comentario de bloque
+                        // Comentario de línea
+                        estado = 30;
+                        // Aquí podríamos guardar lexema si quisiéramos mostrarlo
+                        lexema = "";
+                    } else if (c == '*') {
+                        // Comentario de bloque
+                        estado = 27;
+                        lexema = "";
+                    } else {
+                        // No es comentario, es el operador de división
+                        generarToken(TipoToken.ENTRE, "/");
+                        estado = 0;
+                        i--;
                     }
                     break;
 
-                case 30: // estado para comentarios de linea
+                case 27:
+                    // Dentro de un comentario de bloque
+                    if (c == '*') {
+                        estado = 28; // posible cierre
+                    }
+                    // Se ignora el resto
+                    break;
+
+                case 28:
+                    // Posible cierre de comentario de bloque
+                    if (c == '/') {
+                        // Cierra el comentario
+                        estado = 0;
+                        // Si quisieras imprimir algo:
+                        // System.out.println("Fin comentario de bloque en línea " + linea);
+                    } else if (c == '*') {
+                        // Pueden venir varios '*' seguidos
+                        // seguimos en 28
+                    } else {
+                        // No se cerró, regresamos al estado 27
+                        estado = 27;
+                    }
+                    break;
+
+                case 30:
+                    // Comentario de línea: ignorar todo hasta '\n'
                     if (c == '\n') {
                         estado = 0;
+                        // Si quisieras imprimir algo:
+                        // System.out.println("Fin comentario de línea en " + linea);
                     }
+                    // Ignoramos el resto
                     break;
-
             }
-
-            if (i == fuente.length() - 1 && !ultimoPuntoYComa && estado != 26 && estado != 27) {
-                System.out.println("Error: falta el punto y coma al final de la línea " + linea);
-            }
-
         }
-
-
-        if (cuentita2 != cuentita) {
-            System.out.println("Error: falta cerrar un ( en la linea: " + linea);
-
-        }
-
     }
 
-    private void generarTokenSimple(TipoToken tipo) {
-        System.out.println("< " + tipo + ", " + linea + " >");
-    }
-
-    private void generarTokenMediano(TipoToken tipo, String lexema) {
-        System.out.println("< " + tipo + ", " + lexema + ", " + linea + " >");
-    }
-
+    /**
+     * Genera un token con el lexema dado.
+     */
     private void generarToken(TipoToken tipo, String lexema) {
         String literal = convertirALiteral(tipo, lexema);
-        System.out.println("< "
-                + tipo
-                + ", lexema: " + lexema
-                + ", literal: " + literal
-                + ", linea: " + linea
-                + " >");
+        System.out.println("< " + tipo + ", lexema: " + lexema + ", literal: " + literal + ", linea: " + linea + " >");
     }
 
+    /**
+     * Convierte el lexema a su valor “literal” real, si corresponde.
+     */
     private String convertirALiteral(TipoToken tipo, String lexema) {
         try {
             switch (tipo) {
                 case INT:
-
                     return String.valueOf(Integer.parseInt(lexema));
-
                 case FLOAT:
                 case DOUBLE:
-                    // Aquí parseamos a double
                     double valorDouble = Double.parseDouble(lexema);
-
-
-
                     if (valorDouble == (long) valorDouble) {
-
                         return String.valueOf((long) valorDouble);
                     } else {
                         return String.valueOf(valorDouble);
                     }
-
                 case CADENA:
-                    // Quita comillas inicial y final
-                    if (lexema.length() >= 2
-                            && lexema.startsWith("\"")
-                            && lexema.endsWith("\"")) {
+                    if (lexema.length() >= 2 && lexema.startsWith("\"") && lexema.endsWith("\"")) {
                         return lexema.substring(1, lexema.length() - 1);
                     }
                     return lexema;
-
                 case TRUE:
                     return "true";
-
                 case FALSE:
                     return "false";
-
                 case NULL:
                     return "null";
-
                 default:
                     return lexema;
             }
         } catch (NumberFormatException e) {
-            // Si falla el parseo, devolvemos el lexema
+            // Si falla el parseo numérico, se devuelve el lexema tal cual
             return lexema;
         }
     }
 
-    // depura
+    // Métodos para obtener tokens según las tablas definidas
     public static TipoToken obtenerOperador(String lexema) {
         return operadores.get(lexema);
     }
@@ -389,51 +360,48 @@ public class Analizador {
         return palabrasReservadas.get(lexema);
     }
 
-    // Método para leer desde un archivo
+    /**
+     * Procesa el archivo completo como una sola cadena,
+     * para que los comentarios de bloque que abarcan múltiples líneas se manejen correctamente.
+     */
     public static void procesarArchivo(String archivo) throws IOException {
         BufferedReader reader = new BufferedReader(new FileReader(archivo));
-        String linea;
+        StringBuilder contenido = new StringBuilder();
+        String lineaLeida;
         int numLinea = 1;
-        while ((linea = reader.readLine()) != null) {
-            Analizador analizador = new Analizador(linea, numLinea);
-            analizador.escanear();
-            numLinea++;  // Incrementamos el contador de líneas después de cada entrada
+        while ((lineaLeida = reader.readLine()) != null) {
+            contenido.append(lineaLeida).append("\n");
+            numLinea++;
         }
-        System.out.println("<EOF, lexema: $>");
         reader.close();
+
+        // Analiza todo el contenido en una sola pasada
+        Analizador analizador = new Analizador(contenido.toString(), 1);
+        analizador.escanear();
     }
 
     // Modo REPL (lectura interactiva)
     public static void modoREPL() {
         Scanner scanner = new Scanner(System.in);
-
-        int numLinea = 1;
-        while (true) {
-            System.out.print(">> ");
-
-            if (!scanner.hasNextLine()) {
-
-                break;
-            }
-            String linea = scanner.nextLine();
-
-            Analizador analizador = new Analizador(linea, numLinea);
-            analizador.escanear();
-            numLinea++;
+        StringBuilder entrada = new StringBuilder();
+        System.out.println(">> ");
+        while (scanner.hasNextLine()) {
+            String lineaLeida = scanner.nextLine();
+            entrada.append(lineaLeida).append("\n");
         }
-
         scanner.close();
+
+        Analizador analizador = new Analizador(entrada.toString(), 1);
+        analizador.escanear();
     }
 
+    // Método principal
     public static void main(String[] args) throws IOException {
         if (args.length == 0) {
-            // Si no se pasa un archivo, entramos al modo REPL
             modoREPL();
         } else {
-            // Si se pasa un archivo como argumento, procesamos el archivo
             String archivo = args[0];
             procesarArchivo(archivo);
         }
     }
-
 }
