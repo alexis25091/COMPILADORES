@@ -59,9 +59,12 @@ public class Analizador {
         this.linea = linea; // El contador de línea se pasa desde el main
     }
 
+<<<<<<< HEAD
     int cuentita = 0;
     int cuentita2 = 0;
 
+=======
+>>>>>>> 314b95257a44417d3287c73d2e7de2fd0df5df52
     public void escanear() {
         int estado = 0;
         String lexema = "";
@@ -73,6 +76,7 @@ public class Analizador {
 
             switch (estado) {
 
+<<<<<<< HEAD
                 case 0: // Estado general de análisis
                     // cuenta de ()
                     if (c == '('){
@@ -83,6 +87,10 @@ public class Analizador {
 
                     }
                     // inicio de analizador
+=======
+
+                case 0: // Estado general de análisis
+>>>>>>> 314b95257a44417d3287c73d2e7de2fd0df5df52
                     TipoToken tokenSignoPuntuacion = obtenerSignoPuntuacion(c);
                     if (c == '>') {
                         estado = 1;
@@ -269,7 +277,10 @@ public class Analizador {
                 case 26: // comentario de línea
                     if (c == '\n') {
                         estado = 0; // fin del comentario de línea volver al estado inicial
+<<<<<<< HEAD
 
+=======
+>>>>>>> 314b95257a44417d3287c73d2e7de2fd0df5df52
                     }
                     break;
 
@@ -294,18 +305,24 @@ public class Analizador {
                     break;
 
             }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 314b95257a44417d3287c73d2e7de2fd0df5df52
             if (i == fuente.length() - 1 && !ultimoPuntoYComa && estado != 26 && estado != 27) {
                 System.out.println("Error: falta el punto y coma al final de la línea " + linea);
             }
 
         }
 
+<<<<<<< HEAD
         if (cuentita2 != cuentita) {
             System.out.println("Error: falta cerrar un ( en la linea: " + linea);
 
         }
 
+=======
+>>>>>>> 314b95257a44417d3287c73d2e7de2fd0df5df52
     }
 
     private void generarTokenSimple(TipoToken tipo) {
@@ -434,4 +451,8 @@ public class Analizador {
         }
     }
 
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 314b95257a44417d3287c73d2e7de2fd0df5df52

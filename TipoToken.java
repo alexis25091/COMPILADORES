@@ -17,4 +17,8 @@ public enum TipoToken {
     EOF,
 
     INT, FLOAT, DOUBLE,
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 314b95257a44417d3287c73d2e7de2fd0df5df52
