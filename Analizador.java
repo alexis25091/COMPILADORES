@@ -63,13 +63,16 @@ public class Analizador {
         int estado = 0;
         String lexema = "";
         char previous = ' ';
-       // int Primerlinea = 0;
+        // int Primerlinea = 0;
+        boolean ultimoPuntoYComa = false;
         for (int i = 0; i < fuente.length(); i++) {
             char c = fuente.charAt(i);
 
             switch (estado) {
-                case 0:
-                    TipoToken tokenSignoPuntuacion = obtenerSignoPuntuacion((c));
+
+
+                case 0: // Estado general de análisis
+                    TipoToken tokenSignoPuntuacion = obtenerSignoPuntuacion(c);
                     if (c == '>') {
                         estado = 1;
                         lexema += c;
@@ -92,14 +95,26 @@ public class Analizador {
                         estado = 24;
                         lexema += c;
                     } else if (c == '/') {
+                        // Si encuentra '/', entra al estado de comentario
                         estado = 26;
                         lexema += c;
                     } else if (tokenSignoPuntuacion != null) {
-                        generarTokenSimple(tokenSignoPuntuacion);
+                        if (c == ';') {
+                            if (ultimoPuntoYComa) {
+                                System.out.println("Error: punto y coma consecutivo en línea " + linea);
+                            } else {
+                                generarTokenSimple(tokenSignoPuntuacion);
+                                ultimoPuntoYComa = true;
+                            }
+                        } else {
+                            generarTokenSimple(tokenSignoPuntuacion);
+                            ultimoPuntoYComa = false;
+                        }
                     } else if (c == '.') {
-                        System.out.println("Carácter no valido, " + "error en linea: " + linea);
+                        System.out.println("Carácter no válido, error en línea: " + linea);
                     }
                     break;
+
                 case 1:
                     if (c == '=') {
                         lexema += c;
@@ -234,60 +249,45 @@ public class Analizador {
                         lexema = "";
                     } else if (i == fuente.length() - 1) {
                         System.out.println("Cadena sin cerrar en línea " + linea);
-                        lexema += "\n"; // Agregar salto de línea para mantener la cadena
+                        lexema += "\n"; // agregar salto de linea para mantener la cadena
                     } else {
-                        lexema += c; // Seguir acumulando caracteres
+                        lexema += c; // seguir acumulando caracteres
                     }
                     break;
 
-                case 26: // comienzo de comentarios
-                    if (c != '/'){
-                        i--;
-                        estado = 0;
-                    }
-
-                    if (c == '*'){
-                        estado = 27;
-                        lexema += c;
-                        previous = c;
-                    }
-
-                    if (c == '/'){
-                        estado = 30;
+                case 26: // comentario de línea
+                    if (c == '\n') {
+                        estado = 0; // fin del comentario de línea volver al estado inicial
                     }
                     break;
 
-                case 27: // Estado para comentarios de bloque
+                case 27: // comentario de bloque
                     if (c == '*') {
-                        estado = 28;
-                    } else if (i == fuente.length() - 1) {
-                        estado = 28;
-
-                    }else {
-                        estado = 27;
+                        estado = 28; // potencial fin de comentario
                     }
                     break;
 
-                case 28: // Verificar si realmente es el fin del comentario de bloque
+                case 28: // verificar si es fin de comentario de bloque
                     if (c == '/') {
-                        estado = 0;
+                        estado = 0; // Fin del comentario de bloque volver al estado inicial
                     } else if (c != '*') {
-                        estado = 27;
+                        estado = 27; // continuar leyendo el comentario de bloque
                     }
                     break;
 
-                case 30: // Estado para comentarios de línea
+                case 30: // estado para comentarios de linea
                     if (c == '\n') {
                         estado = 0;
                     }
                     break;
 
             }
+            if (i == fuente.length() - 1 && !ultimoPuntoYComa && estado != 26 && estado != 27) {
+                System.out.println("Error: falta el punto y coma al final de la línea " + linea);
+            }
 
         }
-        if (previous != ';' && previous != '{' && previous != '}' && !fuente.trim().isEmpty()) {
-            System.out.println("Error en línea " + linea + ": se esperaba  ';' ");
-        }
+
     }
 
     private void generarTokenSimple(TipoToken tipo) {
