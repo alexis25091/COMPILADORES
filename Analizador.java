@@ -384,16 +384,20 @@ public class Analizador {
     public static void modoREPL() {
         Scanner scanner = new Scanner(System.in);
         StringBuilder entrada = new StringBuilder();
-        System.out.println(">> ");
+        int numLinea = 1;
+        System.out.print(">> ");
         while (scanner.hasNextLine()) {
             String lineaLeida = scanner.nextLine();
             entrada.append(lineaLeida).append("\n");
+            Analizador analizador = new Analizador(entrada.toString(), numLinea);
+            analizador.escanear();
+            entrada.setLength(0); // Limpiar entrada
+            numLinea++;
+            System.out.print(">> ");
         }
         scanner.close();
-
-        Analizador analizador = new Analizador(entrada.toString(), 1);
-        analizador.escanear();
     }
+
 
     // Método principal
     public static void main(String[] args) throws IOException {
