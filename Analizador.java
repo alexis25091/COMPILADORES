@@ -14,6 +14,7 @@ public class Analizador {
 
     private final String fuente;
     private int linea;
+    private boolean esperandoPuntoYComa = false;
 
     // Bloque estático para inicializar mapas
     static {
@@ -89,9 +90,8 @@ public class Analizador {
                     } else if (c == '=') {
                         estado = 7;
                         lexema = String.valueOf(c);
-                    } else if (c == '!') {
-                        estado = 10;
-                        lexema = String.valueOf(c);
+                        // Esperamos un punto y coma después de una asignación
+                        esperandoPuntoYComa = true;
                     } else if (Character.isLetter(c)) {
                         estado = 13;
                         lexema = String.valueOf(c);
@@ -106,13 +106,16 @@ public class Analizador {
                         estado = 26;
                         lexema = ""; // Limpio para distinguir bien
                     } else if (tokenSignoPuntuacion != null) {
+                        if (c == ';') {
+                            // Un punto y coma es válido en este caso
+                            esperandoPuntoYComa = false; // Reseteamos la bandera
+                        }
                         generarToken(tokenSignoPuntuacion, String.valueOf(c));
-                    }else if (c == '.') {
+                    } else if (c == '.') {
                         System.out.println("Carácter no válido, error en línea: " + linea);
                     }
                     break;
-
-
+                    
                 case 1:
                     if (c == '=') {
                         lexema += c;
@@ -300,6 +303,11 @@ public class Analizador {
                     // Ignoramos el resto
                     break;
             }
+
+        }
+        if (esperandoPuntoYComa) {
+            System.out.println("Error: falta el punto y coma al final de la línea " + linea);
+            esperandoPuntoYComa = false; // Reseteamos para evitar mensajes innecesarios
         }
     }
 
