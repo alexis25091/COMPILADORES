@@ -35,7 +35,7 @@ public class Analizador {
         signosPuntuacion.put('*', TipoToken.PRODUCTO);
         signosPuntuacion.put(';', TipoToken.PUNTO_COMA);
         signosPuntuacion.put(',', TipoToken.COMA);
-        //signosPuntuacion.put('.', TipoToken.PUNTO);
+        // signosPuntuacion.put('.', TipoToken.PUNTO);
         signosPuntuacion.put('(', TipoToken.IZQ_PARENTESIS);
         signosPuntuacion.put(')', TipoToken.DER_PARENTESIS);
         signosPuntuacion.put('{', TipoToken.IZQ_LLAVE);
@@ -68,6 +68,7 @@ public class Analizador {
     public void escanear() {
         int estado = 0;
         String lexema = "";
+        boolean puntos= false;
 
         for (int i = 0; i < fuente.length(); i++) {
             char c = fuente.charAt(i);
@@ -92,6 +93,10 @@ public class Analizador {
                         lexema = String.valueOf(c);
                         // Esperamos un punto y coma después de una asignación
                         esperandoPuntoYComa = true;
+                    } else if (c == '!') {
+                        estado = 10;
+                        lexema = String.valueOf(c);
+
                     } else if (Character.isLetter(c)) {
                         estado = 13;
                         lexema = String.valueOf(c);
@@ -110,20 +115,22 @@ public class Analizador {
                             // Un punto y coma es válido en este caso
                             esperandoPuntoYComa = false; // Reseteamos la bandera
                         }
-                        generarToken(tokenSignoPuntuacion, String.valueOf(c));
+                         generarTokenSimple(tokenSignoPuntuacion);
                     } else if (c == '.') {
+                        System.out.println("Carácter no válido, error en línea: " + linea);
+                    }else if (c == '?'){
                         System.out.println("Carácter no válido, error en línea: " + linea);
                     }
                     break;
-                    
+
                 case 1:
                     if (c == '=') {
                         lexema += c;
-                        generarToken(TipoToken.MAYORIGUAL, lexema);
+                        generarTokenSimple(TipoToken.MAYORIGUAL);
                         estado = 0;
                         lexema = "";
                     } else {
-                        generarToken(TipoToken.MAYORQUE, lexema);
+                        generarTokenSimple(TipoToken.MAYORQUE);
                         estado = 0;
                         lexema = "";
                         i--;
@@ -133,11 +140,11 @@ public class Analizador {
                 case 4:
                     if (c == '=') {
                         lexema += c;
-                        generarToken(TipoToken.MENORIGUAL, lexema);
+                        generarTokenSimple(TipoToken.MENORIGUAL);
                         estado = 0;
                         lexema = "";
                     } else {
-                        generarToken(TipoToken.MENORQUE, lexema);
+                        generarTokenSimple(TipoToken.MENORQUE);
                         estado = 0;
                         lexema = "";
                         i--;
@@ -147,11 +154,11 @@ public class Analizador {
                 case 7:
                     if (c == '=') {
                         lexema += c;
-                        generarToken(TipoToken.IGUALIGUAL, lexema);
+                        generarTokenSimple(TipoToken.IGUALIGUAL);
                         estado = 0;
                         lexema = "";
                     } else {
-                        generarToken(TipoToken.IGUAL, lexema);
+                        generarTokenSimple(TipoToken.IGUAL);
                         estado = 0;
                         lexema = "";
                         i--;
@@ -161,11 +168,11 @@ public class Analizador {
                 case 10:
                     if (c == '=') {
                         lexema += c;
-                        generarToken(TipoToken.DISTINTO, lexema);
+                        generarTokenSimple(TipoToken.DISTINTO);
                         estado = 0;
                         lexema = "";
                     } else {
-                        generarToken(TipoToken.INVERSOR, lexema);
+                        generarTokenSimple(TipoToken.INVERSOR);
                         estado = 0;
                         lexema = "";
                         i--;
@@ -179,9 +186,9 @@ public class Analizador {
                         // Verificamos si es palabra reservada
                         TipoToken tokenPalabraReservada = obtenerPalabraReservada(lexema);
                         if (tokenPalabraReservada == null) {
-                            generarToken(TipoToken.IDENTIFICADOR, lexema);
+                            generarTokenMediano(TipoToken.IDENTIFICADOR, lexema);
                         } else {
-                            generarToken(tokenPalabraReservada, lexema);
+                            generarTokenSimple(tokenPalabraReservada);
                         }
                         estado = 0;
                         lexema = "";
@@ -311,12 +318,22 @@ public class Analizador {
         }
     }
 
-    /**
-     * Genera un token con el lexema dado.
-     */
+    private void generarTokenSimple(TipoToken tipo) {
+        System.out.println("< " + tipo + ", " + linea + " >");
+    }
+
+    private void generarTokenMediano(TipoToken tipo, String lexema) {
+        System.out.println("< " + tipo + ", " + lexema + ", " + linea + " >");
+    }
+
     private void generarToken(TipoToken tipo, String lexema) {
         String literal = convertirALiteral(tipo, lexema);
-        System.out.println("< " + tipo + ", lexema: " + lexema + ", literal: " + literal + ", linea: " + linea + " >");
+        System.out.println("< "
+                + tipo
+                + ", lexema: " + lexema
+                + ", literal: " + literal
+                + ", linea: " + linea
+                + " >");
     }
 
     /**
@@ -381,11 +398,13 @@ public class Analizador {
             contenido.append(lineaLeida).append("\n");
             numLinea++;
         }
+        //System.out.println("<EOF, lexema: $>");
         reader.close();
 
         // Analiza todo el contenido en una sola pasada
         Analizador analizador = new Analizador(contenido.toString(), 1);
         analizador.escanear();
+        System.out.println("<EOF, lexema: $>");
     }
 
     // Modo REPL (lectura interactiva)
@@ -414,6 +433,7 @@ public class Analizador {
         } else {
             String archivo = args[0];
             procesarArchivo(archivo);
+
         }
     }
 }
