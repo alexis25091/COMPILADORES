@@ -12,6 +12,8 @@ public class Analizador {
     // Mapa de palabras reservadas
     private static final Map<String, TipoToken> palabrasReservadas = new HashMap<>();
 
+    private static final Map<String, TipoToken> operadorlogico = new HashMap<>();
+
     private final String fuente;
     private int linea;
     private boolean esperandoPuntoYComa = false;
@@ -41,14 +43,14 @@ public class Analizador {
         signosPuntuacion.put('{', TipoToken.IZQ_LLAVE);
         signosPuntuacion.put('}', TipoToken.DER_LLAVE);
 
-        palabrasReservadas.put("and", TipoToken.AND);
+        operadorlogico.put("and", TipoToken.AND);
         palabrasReservadas.put("else", TipoToken.ELSE);
         palabrasReservadas.put("false", TipoToken.FALSE);
         palabrasReservadas.put("for", TipoToken.FOR);
         palabrasReservadas.put("fun", TipoToken.FUN);
         palabrasReservadas.put("if", TipoToken.IF);
         palabrasReservadas.put("null", TipoToken.NULL);
-        palabrasReservadas.put("or", TipoToken.OR);
+        operadorlogico.put("or", TipoToken.OR);
         palabrasReservadas.put("print", TipoToken.PRINT);
         palabrasReservadas.put("return", TipoToken.RETURN);
         palabrasReservadas.put("true", TipoToken.TRUE);
@@ -180,19 +182,27 @@ public class Analizador {
                     break;
 
                 case 13:
+                    if(Character.isLetter(c)){
+                        estado = 13;
+                        lexema += c;
+                    }else {
+                        
+                    }
                     if (Character.isLetterOrDigit(c)) {
+                        estado = 13;
                         lexema += c;
                     } else {
-                        // Verificamos si es palabra reservada
-                        TipoToken tokenPalabraReservada = obtenerPalabraReservada(lexema);
+                        TipoToken tokenPalabraReservada = obtenerPalabraReservada(String.valueOf(lexema));
                         if (tokenPalabraReservada == null) {
                             generarTokenMediano(TipoToken.IDENTIFICADOR, lexema);
+                            estado = 0;
+                            lexema = "";
                         } else {
                             generarTokenSimple(tokenPalabraReservada);
                         }
                         estado = 0;
                         lexema = "";
-                        i--;
+                        i--;  // Retrocede el índice para procesar el siguiente carácter
                     }
                     break;
 
@@ -270,7 +280,7 @@ public class Analizador {
                         lexema = "";
                     } else {
                         // No es comentario, es el operador de división
-                        generarToken(TipoToken.ENTRE, "/");
+                        generarTokenSimple(TipoToken.ENTRE);
                         estado = 0;
                         i--;
                     }
