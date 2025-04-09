@@ -19,5 +19,3 @@ public enum TipoToken {
     INT, FLOAT, DOUBLE,
 
 }
-
-

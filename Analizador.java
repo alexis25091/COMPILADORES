@@ -2,9 +2,12 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.List;
+import java.util.ArrayList;
 
 public class Analizador {
 
+    private final List<Token> tokens = new ArrayList<>();
     // Mapa de operadores
     private static final Map<String, TipoToken> operadores = new HashMap<>();
     // Mapa de signos de puntuación
@@ -351,20 +354,27 @@ public class Analizador {
             }
 
         }
-
-
+/*      Prueba para ver si sirve el metodo para generar token y almacenar en lista
+        System.out.println("Tokens generados:");
+        for (Token token : tokens) {
+            System.out.println(token);  // Esto imprimirá la representación del token
+        }
+*/
     }
 
     private void generarTokenSimple(TipoToken tipo) {
+        tokens.add(new Token(tipo, null, null, linea));
         System.out.println("< " + tipo + ", " + linea + " >");
     }
 
     private void generarTokenMediano(TipoToken tipo, String lexema) {
+        tokens.add(new Token(tipo, lexema, null, linea));
         System.out.println("< " + tipo + ", " + lexema + ", " + linea + " >");
     }
 
     private void generarToken(TipoToken tipo, String lexema) {
         String literal = convertirALiteral(tipo, lexema);
+        tokens.add(new Token(tipo, lexema, literal, linea));
         System.out.println("< "
                 + tipo
                 + ", lexema: " + lexema
@@ -408,6 +418,11 @@ public class Analizador {
             return lexema;
         }
     }
+
+    public List<Token> getTokens() {
+        return tokens;
+    }
+
 
     // Métodos para obtener tokens según las tablas definidas
     public static TipoToken obtenerOperador(String lexema) {
