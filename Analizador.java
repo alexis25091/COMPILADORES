@@ -83,7 +83,7 @@ public class Analizador {
                     TipoToken tokenSignoPuntuacion = obtenerSignoPuntuacion(c);
 
                     if (c == '{') {
-                    esperandoPuntoYComa = false;
+                        esperandoPuntoYComa = false;
                     }
 
                     if (c == '>') {
@@ -463,6 +463,16 @@ public class Analizador {
         Analizador analizador = new Analizador(contenido.toString(), 1);
         analizador.escanear();
         System.out.println("<EOF, lexema: $>");
+        List<Token> tokens = analizador.getTokens(); // o como se llame tu método
+
+        Parser parser = new Parser(tokens);
+        boolean resultado = parser.parse();
+
+        if (resultado) {
+            System.out.println("todo ok en el analizador sintactico");
+        } else {
+            System.out.println("hubo errores en el analizador sintactico");
+        }
     }
 
     // Modo REPL (lectura interactiva)
