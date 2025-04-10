@@ -54,20 +54,20 @@ public class Parser {
     }
 
     private void parameters() {
-        // implementacion minima por ahora :]
         if (check(TipoToken.IDENTIFICADOR)) {
-            advance();
-            while (check(TipoToken.COMA)) {
-                advance();
-                consume(TipoToken.IDENTIFICADOR, "Se esperaba otro parámetro");
+            consume(TipoToken.IDENTIFICADOR, "Se esperaba nombre del parámetro");
+            while (match(TipoToken.COMA)) {
+                consume(TipoToken.IDENTIFICADOR, "Se esperaba nombre del parámetro");
             }
         }
     }
 
+
+
     private void block() {
         consume(TipoToken.IZQ_LLAVE, "Se esperaba '{'");
         while (!check(TipoToken.DER_LLAVE) && !isAtEnd()) {
-            advance(); // aun falta terminar, podemos agregar otras funciones al bloque
+            declaration(); // para declaraciones dentro del bloque
         }
         consume(TipoToken.DER_LLAVE, "Se esperaba '}'");
     }
@@ -110,7 +110,7 @@ public class Parser {
         consume(TipoToken.FOR, "Se esperaba 'for'");
         consume(TipoToken.IZQ_PARENTESIS, "Se esperaba '(' después de 'for'");
 
-        // FOR_STMT_INIT
+
         if (check(TipoToken.VAR)) {
             varDecl();
         } else if (check(TipoToken.PUNTO_COMA)) {
@@ -119,28 +119,41 @@ public class Parser {
             exprStmt();
         }
 
-        // FOR_STMT_COND
+
         if (!check(TipoToken.PUNTO_COMA)) {
             expression();
         }
         consume(TipoToken.PUNTO_COMA, "Se esperaba ';' después de la condición");
 
-        // FOR_STMT_INC
+
+        forStmtInc();
+
+        consume(TipoToken.DER_PARENTESIS, "Se esperaba ')' después de los incrementos");
+        statement();
+    }
+
+    private void forStmtInc() {
         if (!check(TipoToken.DER_PARENTESIS)) {
             expression();
         }
-        consume(TipoToken.DER_PARENTESIS, "Se esperaba ')' después de los incrementos");
 
-        // cuerpo del for
-        statement();
     }
 
     private void ifStmt() {
         consume(TipoToken.IF, "Se esperaba 'if'");
         consume(TipoToken.IZQ_PARENTESIS, "Se esperaba '(' después de 'if'");
-        expression(); // condición
+        expression();
         consume(TipoToken.DER_PARENTESIS, "Se esperaba ')' después de la condición");
-        statement(); // cuerpo del if
+        statement();
+        elseStmt();
+    }
+
+    private void elseStmt() {
+        if (check(TipoToken.ELSE)) {
+            advance();
+            statement();
+        }
+
     }
 
     private void printStmt() {
@@ -160,18 +173,120 @@ public class Parser {
     private void returnStmt() {
         consume(TipoToken.RETURN, "Se esperaba 'return'");
         if (!check(TipoToken.PUNTO_COMA)) {
-            expression(); // retorno opcional
+            expression();
         }
         consume(TipoToken.PUNTO_COMA, "Se esperaba ';' después de return");
     }
 
+    // EXPRESIONES
+
     private void expression() {
-        // expresión simplificada por ahora: solo acepta literales o identificadores
-        if (check(TipoToken.IDENTIFICADOR) || check(TipoToken.INT) || check(TipoToken.FLOAT) || check(TipoToken.DOUBLE) || check(TipoToken.TRUE) || check(TipoToken.FALSE)) {
-            advance();
-        } else {
-            throw error(peek(), "Se esperaba una expresión");
+        assignment();
+    }
+
+    private void assignment() {
+        logicOr();
+
+        if (match(TipoToken.IGUAL)) {
+            expression(); // lado derecho de la asignación
         }
+    }
+
+    private void logicOr() {
+        logicAnd();
+        while (match(TipoToken.OR)) {
+            logicAnd(); // LOGIC_OR’
+        }
+    }
+
+    private void logicAnd() {
+        equality();
+        while (match(TipoToken.AND)) {
+            equality(); // LOGIC_AND’
+        }
+    }
+
+    private void equality() {
+        comparison();
+        while (match(TipoToken.IGUALIGUAL, TipoToken.DISTINTO)) {
+            comparison(); // == o !=
+        }
+    }
+
+    private void comparison() {
+        term();
+        while (match(TipoToken.MAYORQUE, TipoToken.MAYORIGUAL, TipoToken.MENORQUE, TipoToken.MENORIGUAL)) {
+            term();
+        }
+    }
+
+    private void term() {
+        factor();
+        while (match(TipoToken.MAS, TipoToken.MENOS)) {
+            factor();
+        }
+    }
+
+    private void factor() {
+        unary();
+        while (match(TipoToken.PRODUCTO, TipoToken.ENTRE)) {
+            unary();
+        }
+    }
+
+    private void unary() {
+        if (match(TipoToken.NOT, TipoToken.MENOS)) {
+            unary(); // recursivo para unarios
+        } else {
+            call();
+        }
+    }
+
+    private void call() {
+        primary(); // parte izquierda de la llamada
+
+        while (true) {
+            if (match(TipoToken.IZQ_PARENTESIS)) {
+                arguments();
+                consume(TipoToken.DER_PARENTESIS, "Se esperaba ')' después de los argumentos");
+            } else {
+                break;
+            }
+        }
+    }
+
+    private void arguments() {
+        if (!check(TipoToken.DER_PARENTESIS)) {
+            expression();
+            while (match(TipoToken.COMA)) {
+                expression();
+            }
+        }
+    }
+
+    private void primary() {
+        if (match(TipoToken.TRUE, TipoToken.FALSE, TipoToken.NULL, TipoToken.INT, TipoToken.FLOAT, TipoToken.CADENA)) {
+            return;
+        }
+        if (match(TipoToken.IDENTIFICADOR)) {
+            return;
+        }
+        if (match(TipoToken.IZQ_PARENTESIS)) {
+            expression();
+            consume(TipoToken.DER_PARENTESIS, "Se esperaba ')' después de la expresión agrupada");
+            return;
+        }
+        throw error(peek(), "Se esperaba una expresión primaria");
+    }
+
+    private boolean match(TipoToken... tipos) {
+        for (TipoToken tipo : tipos) {
+            if (check(tipo)) {
+                advance();
+                return true;
+            }
+        }
+        return false;
     }
 
     // funciones del parser
