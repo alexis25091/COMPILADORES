@@ -4,7 +4,7 @@ public enum TipoToken {
 
     MENORQUE, MENORIGUAL, MAYORQUE, MAYORIGUAL, IGUALIGUAL, DISTINTO,
 
-    AND, OR,
+    AND, OR, NOT,
     IGUAL, INVERSOR,
 
     IZQ_PARENTESIS, DER_PARENTESIS,
@@ -17,5 +17,8 @@ public enum TipoToken {
     EOF,
 
     INT, FLOAT, DOUBLE,
+
+    INCREMENTO,
+    DECREMENTO
 
 }
