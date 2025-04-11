@@ -235,7 +235,7 @@ public class Parser {
     }
 
     private void unary() {
-        if (match(TipoToken.NOT, TipoToken.MENOS)) {
+        if (match(TipoToken.NOT, TipoToken.MENOS, TipoToken.INVERSOR)) {
             unary(); // recursivo para unarios
         } else {
             call();

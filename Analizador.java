@@ -204,7 +204,7 @@ public class Analizador {
                             if (c != '\n')
                                 i--;
                         }else{
-                            if (Character.isLetterOrDigit(c)) {
+                            if (Character.isLetterOrDigit(c) || c == '_') {
                                 estado = 13;
                                 lexema += c;
                             } else {
