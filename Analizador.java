@@ -118,6 +118,14 @@ public class Analizador {
                         // Podría ser división o inicio de comentario
                         estado = 26;
                         lexema = ""; // Limpio para distinguir bien
+                    } else if (c == '+') {
+                        estado = 31;
+                        lexema = String.valueOf(c);
+                        esperandoPuntoYComa = true;
+                    } else if (c == '-') {
+                        estado = 32; 
+                        lexema = String.valueOf(c);
+                        esperandoPuntoYComa = true;
                     } else if (tokenSignoPuntuacion != null) {
                         if (c == ';') {
                             // Un punto y coma es válido en este caso
@@ -204,7 +212,7 @@ public class Analizador {
                             if (c != '\n')
                                 i--;
                         }else{
-                            if (Character.isLetterOrDigit(c)) {
+                            if (Character.isLetterOrDigit(c) || c == '_') {
                                 estado = 13;
                                 lexema += c;
                             } else {
@@ -344,6 +352,31 @@ public class Analizador {
                     }
                     // Ignoramos el resto
                     break;
+
+                case 31:
+                    if (c == '+') {
+                        lexema += c;
+                        generarTokenSimple(TipoToken.INCREMENTO);
+                    } else {
+                        generarTokenSimple(TipoToken.MAS);
+                        if (c != '\n') i--;
+                    }
+                    estado = 0;
+                    lexema = "";
+                    break;
+
+                case 32:
+                    if (c == '-') {
+                        lexema += c;
+                        generarTokenSimple(TipoToken.DECREMENTO);
+                    } else {
+                        generarTokenSimple(TipoToken.MENOS);
+                        if (c != '\n') i--;
+                    }
+                    estado = 0;
+                    lexema = "";
+                    break;
+
             }
             if (c == '\n') {
                 linea++;
@@ -360,7 +393,10 @@ public class Analizador {
             System.out.println(token);  // Esto imprimirá la representación del token
         }
 */
+        // Añadimos token EOF para indicar fin de entrada
+        tokens.add(new Token(TipoToken.EOF, "$", null, linea));
     }
+
 
     private void generarTokenSimple(TipoToken tipo) {
         tokens.add(new Token(tipo, null, null, linea));
