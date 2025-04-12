@@ -123,7 +123,7 @@ public class Analizador {
                         lexema = String.valueOf(c);
                         esperandoPuntoYComa = true;
                     } else if (c == '-') {
-                        estado = 32; 
+                        estado = 32;
                         lexema = String.valueOf(c);
                         esperandoPuntoYComa = true;
                     } else if (tokenSignoPuntuacion != null) {
@@ -505,9 +505,9 @@ public class Analizador {
         boolean resultado = parser.parse();
 
         if (resultado) {
-            System.out.println("todo ok en el analizador sintactico");
+            System.out.println("Programa valido");
         } else {
-            System.out.println("hubo errores en el analizador sintactico");
+            System.out.println("Programa no valido");
         }
     }
 
@@ -522,6 +522,16 @@ public class Analizador {
             entrada.append(lineaLeida).append("\n");
             Analizador analizador = new Analizador(entrada.toString(), numLinea);
             analizador.escanear();
+            List<Token> tokens = analizador.getTokens(); // o como se llame tu método
+
+            Parser parser = new Parser(tokens);
+            boolean resultado = parser.parse();
+
+            if (resultado) {
+                System.out.println("Programa valido");
+            } else {
+                System.out.println("Programa no valido");
+            }
             entrada.setLength(0); // Limpiar entrada
             numLinea++;
             System.out.print(">> ");
